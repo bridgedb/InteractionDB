@@ -6,11 +6,4 @@ A BridgeDB derby database to map interactions from different databases to each o
 Interaction Mapping obtained from : http://www.ebi.ac.uk/rhea/
 
 DataSources supported at present:
-Enzyme Code
-EcoCyc
-MetaCyc
-Macie
-Reactome
-Kegg Reaction
-Unipathway
-Uniprot
+Enzyme Code, EcoCyc, MetaCyc, Macie, Reactome, Kegg Reaction, Unipathway, Uniprot.
