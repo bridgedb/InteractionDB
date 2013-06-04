@@ -35,13 +35,11 @@ public class IntdbBuilder {
 	/**
 	 * command line arguments
 	 * 1 - absolute path of the interactions database to be created (for eg: /home/anwesha/interactions.bridge)
-	 * 2 - absolute path of the mapp
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
 		String dbname = args[0];
-//		String file = args[1];
 
 		IntdbBuilder intdb = new IntdbBuilder();
 
