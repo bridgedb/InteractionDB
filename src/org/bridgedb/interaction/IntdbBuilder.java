@@ -25,45 +25,33 @@ import org.bridgedb.rdb.construct.GdbConstructImpl3;
 
 public class IntdbBuilder {
 
-	private String filesep = System.getProperty("file.separator");
-	private File mappingfile = new File("resources" + filesep
+	private static String filesep = System.getProperty("file.separator");
+	private static File mappingfile = new File("resources" + filesep
 			+ "rhea2xrefs.txt");
-	// private String[] array = new String[5];
-	// private String mainref = "";
-	 private Xref idRhea;
-	// private String identifier;
-	// private String datasource;
-	// private String inputline;
+	private Xref idRhea;
 	private GdbConstruct newDb;
-	private String dbname;
-//	private int intcount = 0;
 	private List<Xref> intxrefs = new ArrayList<Xref>();
 
 	/**
+	 * command line arguments
+	 * 1 - absolute path of the interactions database to be created (for eg: /home/anwesha/interactions.bridge)
+	 * 2 - absolute path of the mapp
 	 * @param args
-	 *            command line arguments
-	 * 
-	 *            Commandline: - output database: .pgdb - input metabocards .txt
-	 *            file
 	 */
 	public static void main(String[] args) {
 
 		String dbname = args[0];
-		String file = args[1];
+//		String file = args[1];
 
-		// InteractionMapper r2 = new InteractionMapper();
 		IntdbBuilder intdb = new IntdbBuilder();
 
-		// intdb.downloadMapping();
+		intdb.downloadMapping();
 
 		try {
 			GdbConstruct newDb = GdbConstructImpl3.createInstance(dbname,
 					new DataDerby(), DBConnector.PROP_RECREATE);
-			InputStream mapping = new FileInputStream(new File(file));
-//			InputStream count = new FileInputStream(new File(file));
-//			intdb.countInt(count);
+			InputStream mapping = new FileInputStream(mappingfile);
 			intdb.init(dbname, newDb);
-			System.out.println("working");
 			intdb.run(mapping);
 			intdb.done();
 		} catch (Exception e) {
@@ -73,22 +61,9 @@ public class IntdbBuilder {
 
 	}
 
-//	private void countInt(InputStream input) throws IOException {
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-//		String inputline1 = "";
-//		String[] array1 = new String[5];
-//		String mainref = "";
-//		while ((inputline1 = reader.readLine()) != null) {
-//			array1 = inputline1.split("\t");
-//			if (!mainref.equalsIgnoreCase(array1[0])) {
-//				intcount++;
-//				mainref = array1[0];
-//			}
-//		}
-//		System.out.println("interactions:" + intcount);
-//
-//	}
-
+	/**
+	 * Downloads a fresh copy of the maaping from Rhea
+	 */
 	private void downloadMapping() {
 		URL url;
 		String inputline = "";
@@ -103,9 +78,9 @@ public class IntdbBuilder {
 			}
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
-			// while ((inputLine = in.readLine()) != null) {
-			for (int i = 0; i <= 10; i++) {
-				inputline = in.readLine();
+//			while ((inputline = in.readLine()) != null) {
+			for (int i =0; i<=50;i++){
+			inputline = in.readLine();
 				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
 					out.write(inputline + "\n");
 				}
@@ -120,12 +95,6 @@ public class IntdbBuilder {
 		}
 	}
 
-	// protected void displayrefs(){
-	// for(Xref ref:idRhea){
-	// System.out.println("rhea"+ref.getId());
-	// }
-	// }
-
 	/**
 	 * Creates an empty Derby database
 	 * 
@@ -136,7 +105,7 @@ public class IntdbBuilder {
 			throws IDMapperException {
 
 		this.newDb = newDb;
-		this.dbname = dbname;
+		// this.dbname = dbname;
 
 		newDb.createGdbTables();
 		newDb.preInsert();
@@ -147,7 +116,6 @@ public class IntdbBuilder {
 		newDb.setInfo("DATASOURCEVERSION", "23-05-2013");
 		newDb.setInfo("SERIES", "standard-interaction");
 		newDb.setInfo("DATATYPE", "Interaction");
-		// newDb.
 		System.out.println("Empty Database created");
 	}
 
@@ -160,21 +128,17 @@ public class IntdbBuilder {
 	 */
 	private void run(InputStream input) throws MalformedURLException,
 			IOException, IDMapperException {
-		// System.out.println("init");
-		// BioDataSource.init();
 		String identifier;
 		String datasource;
 		String mainref = "";
 		String inputline;
 		String[] array = new String[5];
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(input));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		while ((inputline = reader.readLine()) != null) {
 			array = inputline.split("\t");
 			identifier = array[3];
 			datasource = array[4];
 			if (!mainref.equalsIgnoreCase(array[0])) {
-				// intcount++;
 				mainref = array[0];
 				intxrefs.clear();
 				idRhea = new Xref(mainref, BioDataSource.RHEA);
@@ -209,9 +173,6 @@ public class IntdbBuilder {
 				}
 			}
 
-			// System.out.println("interaction count: " + intcount);
-			// System.out.println("intxrefs: " + intxrefs);
-			// System.out.println("contains: " + intxrefs.contains(idRhea));
 			Xref ref = idRhea;
 			newDb.addGene(ref);
 			newDb.addLink(ref, ref);
