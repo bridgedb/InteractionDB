@@ -1,3 +1,4 @@
+
 package org.bridgedb.interaction;
 
 import java.io.BufferedReader;
@@ -23,6 +24,10 @@ import org.bridgedb.rdb.construct.DataDerby;
 import org.bridgedb.rdb.construct.GdbConstruct;
 import org.bridgedb.rdb.construct.GdbConstructImpl3;
 
+/**
+ * @author anwesha
+ *
+ */
 public class IntdbBuilder {
 
 	private static String filesep = System.getProperty("file.separator");
@@ -33,8 +38,9 @@ public class IntdbBuilder {
 	private List<Xref> intxrefs = new ArrayList<Xref>();
 
 	/**
-	 * command line arguments
-	 * 1 - absolute path of the interactions database to be created (for eg: /home/anwesha/interactions.bridge)
+	 * command line arguments 1 - absolute path of the interactions database to
+	 * be created (for eg: /home/anwesha/interactions.bridge)
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -60,7 +66,7 @@ public class IntdbBuilder {
 	}
 
 	/**
-	 * Downloads a fresh copy of the maaping from Rhea
+	 * Downloads a fresh copy of interaction mappings from Rhea
 	 */
 	private void downloadMapping() {
 		URL url;
@@ -76,9 +82,9 @@ public class IntdbBuilder {
 			}
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
-//			while ((inputline = in.readLine()) != null) {
-			for (int i =0; i<=50;i++){
-			inputline = in.readLine();
+			// while ((inputline = in.readLine()) != null) {
+			for (int i = 0; i <= 50; i++) {
+				inputline = in.readLine();
 				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
 					out.write(inputline + "\n");
 				}
@@ -103,7 +109,6 @@ public class IntdbBuilder {
 			throws IDMapperException {
 
 		this.newDb = newDb;
-		// this.dbname = dbname;
 
 		newDb.createGdbTables();
 		newDb.preInsert();
@@ -118,14 +123,14 @@ public class IntdbBuilder {
 	}
 
 	/**
-	 * Parsing the mapping file and populating the database
+	 * Parses the mapping file and populates the database
 	 * 
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws IDMapperException
 	 */
 	private void run(InputStream input) throws MalformedURLException,
-			IOException, IDMapperException {
+	IOException, IDMapperException {
 		String identifier;
 		String datasource;
 		String mainref = "";
@@ -182,7 +187,7 @@ public class IntdbBuilder {
 	}
 
 	/**
-	 * Finalizing the database
+	 * Finalizes the database
 	 * 
 	 * @throws IDMapperException
 	 */
