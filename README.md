@@ -8,9 +8,9 @@ EcoCyc, MetaCyc, Macie, Reactome, Kegg Reaction, Unipathway, and Uniprot. This d
 annotate interactions in PathVisio(http://www.pathvisio.org/) and Wikipathways
 (http://wikipathways.org/index.php/WikiPathways).
 
-Download the jar file and run the jar providing the absolute path of the interaction database to be created 
+Download the InteractionDB.jar file and run the jar providing the absolute path of the interaction database to be created 
 as an argument.
 
 For example: 
 
-java -jar InteractionDb.jar "/home/anwesha/PathVisio-Data/gene databases/Interactions.bridge"
+java -jar InteractionDB.jar "/home/anwesha/PathVisio-Data/gene databases/Interactions.bridge"
