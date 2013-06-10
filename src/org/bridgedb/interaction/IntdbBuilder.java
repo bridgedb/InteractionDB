@@ -1,4 +1,3 @@
-
 package org.bridgedb.interaction;
 
 import java.io.BufferedReader;
@@ -25,17 +24,24 @@ import org.bridgedb.rdb.construct.GdbConstruct;
 import org.bridgedb.rdb.construct.GdbConstructImpl3;
 
 /**
+ * This program creates an Interaction annotation BridgeDB derby database
+ * mappings from : Rhea
+ * 
  * @author anwesha
- *
+ * 
  */
 public class IntdbBuilder {
 
 	private static String filesep = System.getProperty("file.separator");
 	private static File mappingfile = new File("resources" + filesep
 			+ "rhea2xrefs.txt");
+	private static String dbname;
 	private Xref idRhea;
-	private GdbConstruct newDb;
+	private static GdbConstruct newDb;
 	private List<Xref> intxrefs = new ArrayList<Xref>();
+	private String identifier;
+	private String datasource;
+	private String mainref;
 
 	/**
 	 * command line arguments 1 - absolute path of the interactions database to
@@ -45,17 +51,17 @@ public class IntdbBuilder {
 	 */
 	public static void main(String[] args) {
 
-		String dbname = args[0];
+		dbname = args[0];
 
 		IntdbBuilder intdb = new IntdbBuilder();
 
 		intdb.downloadMapping();
 
 		try {
-			GdbConstruct newDb = GdbConstructImpl3.createInstance(dbname,
-					new DataDerby(), DBConnector.PROP_RECREATE);
+			newDb = GdbConstructImpl3.createInstance(dbname, new DataDerby(),
+					DBConnector.PROP_RECREATE);
 			InputStream mapping = new FileInputStream(mappingfile);
-			intdb.init(dbname, newDb);
+			intdb.init(newDb);
 			intdb.run(mapping);
 			intdb.done();
 		} catch (Exception e) {
@@ -82,8 +88,7 @@ public class IntdbBuilder {
 			}
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
-			// while ((inputline = in.readLine()) != null) {
-			for (int i = 0; i <= 50; i++) {
+			while ((inputline = in.readLine()) != null) {
 				inputline = in.readLine();
 				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
 					out.write(inputline + "\n");
@@ -105,10 +110,9 @@ public class IntdbBuilder {
 	 * @throws IDMapperException
 	 *             when it cannot write to the database
 	 */
-	private void init(String dbname, GdbConstruct newDb)
-			throws IDMapperException {
+	private void init(GdbConstruct newDb) throws IDMapperException {
 
-		this.newDb = newDb;
+		IntdbBuilder.newDb = newDb;
 
 		newDb.createGdbTables();
 		newDb.preInsert();
@@ -116,10 +120,9 @@ public class IntdbBuilder {
 		String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
 		newDb.setInfo("BUILDDATE", dateStr);
 		newDb.setInfo("DATASOURCENAME", "EBI-RHEA");
-		newDb.setInfo("DATASOURCEVERSION", "23-05-2013");
+		newDb.setInfo("DATASOURCEVERSION", "1");
 		newDb.setInfo("SERIES", "standard-interaction");
 		newDb.setInfo("DATATYPE", "Interaction");
-		System.out.println("Empty Database created");
 	}
 
 	/**
@@ -130,10 +133,8 @@ public class IntdbBuilder {
 	 * @throws IDMapperException
 	 */
 	private void run(InputStream input) throws MalformedURLException,
-	IOException, IDMapperException {
-		String identifier;
-		String datasource;
-		String mainref = "";
+			IOException, IDMapperException {
+		mainref = "";
 		String inputline;
 		String[] array = new String[5];
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
