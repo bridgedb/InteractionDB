@@ -1,19 +1,77 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="create_run_jar" name="Create Runnable Jar for Project InteractionDB">
-    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
-    <!--ANT 1.7 is required                                        -->
-    <target name="create_run_jar">
-        <jar destfile="/home/bohler/GitHub/InteractionDB/InteractionDB.jar" filesetmanifest="mergewithoutmain">
-            <manifest>
-                <attribute name="Main-Class" value="org.bridgedb.interaction.IntdbBuilder"/>
-                <attribute name="Class-Path" value="."/>
-            </manifest>
-            <fileset dir="/home/bohler/GitHub/InteractionDB/bin"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/bohler/GitHub/InteractionDB/lib/derby.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/bohler/GitHub/InteractionDB/lib/org.bridgedb.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/bohler/GitHub/InteractionDB/lib/org.bridgedb.bio.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/bohler/GitHub/InteractionDB/lib/org.bridgedb.rdb.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/bohler/GitHub/InteractionDB/lib/org.bridgedb.rdb.construct.jar"/>
-        </jar>
-    </target>
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="InteractionDB" default="jar" basedir=".">
+    <description>
+		Ant build file to build the java application which 
+		generates a BridgeDB derby database
+	</description>
+	
+	 <!-- set global properties for this build -->	
+	<property name="src" location="src"/>
+	<property name="lib" location="lib"/> 
+	<property name="resources" location="resources"/> 
+	<property name="build" location="build"/>
+	<property name="dist"  location="dist"/>
+   
+	<path id="project.class.path">
+		<fileset dir="${lib}">
+			<include name="derby.jar"/>
+			<include name="org.bridgedb.jar"/>
+			<include name="org.bridgedb.bio.jar"/>
+			<include name="org.bridgedb.rdb.construct.jar"/>
+		</fileset>
+	</path>
+	
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
+  </target>
+ 
+	
+  <target name="compile" depends="init">
+		<echo>Compiling: ${jar.name}</echo>
+		<javac srcdir="${src}"
+			includes="**"
+			destdir="${build}"
+			debug="true"
+			source="1.5">
+			<classpath>
+				<path refid="project.class.path"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile"> 
+			<jar destfile="dist/${ant.project.name}-${DSTAMP}.jar" filesetmanifest="mergewithoutmain">
+				<manifest>
+					<attribute name="Main-Class" value="org.bridgedb.interaction.IntdbBuilder"/>
+				    <attribute name="Class-Path" value="."/>
+				</manifest>
+			 <fileset dir="${build}">
+				 <include name="**/*"/>
+				</fileset>
+			    <fileset dir="${resources}">
+					<include name="**/*"/>
+				</fileset>
+	            <manifest>
+					<attribute name="Class-Path" value="."/>
+				</manifest>
+	        </jar>
+		</target>
+	
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} directory -->
+       <delete dir="${build}"/>
+   </target>
+	
+	<target name="dist-clean"
+	        description="clean up" >
+	    <!-- Delete the ${build} and ${dist} directories -->
+	    <delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	   </target>
+	
 </project>
