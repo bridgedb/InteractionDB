@@ -89,7 +89,6 @@ public class IntdbBuilder {
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
 			while ((inputline = in.readLine()) != null) {
-				inputline = in.readLine();
 				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
 					out.write(inputline + "\n");
 				}
@@ -120,7 +119,7 @@ public class IntdbBuilder {
 		String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
 		newDb.setInfo("BUILDDATE", dateStr);
 		newDb.setInfo("DATASOURCENAME", "EBI-RHEA");
-		newDb.setInfo("DATASOURCEVERSION", "1");
+		newDb.setInfo("DATASOURCEVERSION", "1.0.0");
 		newDb.setInfo("SERIES", "standard-interaction");
 		newDb.setInfo("DATATYPE", "Interaction");
 	}
@@ -144,6 +143,7 @@ public class IntdbBuilder {
 			datasource = array[4];
 			if (!mainref.equalsIgnoreCase(array[0])) {
 				mainref = array[0];
+				System.out.println(mainref + "added");
 				intxrefs.clear();
 				idRhea = new Xref(mainref, BioDataSource.RHEA);
 				intxrefs.add(new Xref(mainref, BioDataSource.RHEA));
@@ -181,6 +181,7 @@ public class IntdbBuilder {
 			newDb.addGene(ref);
 			newDb.addLink(ref, ref);
 			for (Xref right : intxrefs) {
+				System.out.println("id: "+right.getId()+ "added to the database");
 				newDb.addGene(right);
 				newDb.addLink(ref, right);
 			}
