@@ -10,7 +10,7 @@ annotate interactions in PathVisio(http://www.pathvisio.org/) and Wikipathways
 
 You can build the program by checking out the source code and running the build file using ant.
 
-Or, alternatively you can use the program directly without having to firstbuild it by downloading the pre-built 
+Or, alternatively you can use the program directly without having to first build it, by downloading the pre-built 
 InteractionDB.jar file from the dist folder and run the jar providing the absolute path of the interaction database 
 to be created as an argument.
 
