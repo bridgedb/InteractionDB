@@ -30,12 +30,15 @@ import org.bridgedb.rdb.construct.GdbConstructImpl3;
  * @author anwesha
  * 
  */
+@SuppressWarnings("deprecation")
 public class IntdbBuilder {
-
-	private static String filesep = System.getProperty("file.separator");
-	private static File mappingfile = new File("resources" + filesep
-			+ "rhea2xrefs.txt");
-	private static String dbname;
+	static String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
+	static float newpercent = 0;
+	private static int mappingrows = 0;
+	private static int mappingrow = 0;
+	private static File mappingfile = new File("rhea2xrefs.txt");
+	private static String dbname = "rhea_interactions";
+	private static String outputdir = System.getProperty("user.home");
 	private Xref idRhea;
 	private static GdbConstruct newDb;
 	private List<Xref> intxrefs = new ArrayList<Xref>();
@@ -44,22 +47,30 @@ public class IntdbBuilder {
 	private String mainref;
 
 	/**
-	 * command line arguments 1 - absolute path of the interactions database to
-	 * be created (for eg: /home/anwesha/interactions.bridge)
+	 * command line arguments: 1 - Name of the interactions database to be
+	 * created (eg: interactions) 2 - Output Directory (eg: /home/anwesha/test)
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		dbname = args[0];
-
+		try{
+			if (!args[0].isEmpty()) {
+				dbname = args[0];
+			} 
+			if (!args[1].isEmpty()) {
+				outputdir = args[1];
+			} 
+		}catch (Exception e){
+			System.out.println("Using defaults name and output directory");
+		}
 		IntdbBuilder intdb = new IntdbBuilder();
 
 		intdb.downloadMapping();
 
 		try {
-			newDb = GdbConstructImpl3.createInstance(dbname, new DataDerby(),
-					DBConnector.PROP_RECREATE);
+			String newDbname = outputdir+System.getProperty("file.separator")+dbname + "_" + dateStr
+					+ ".bridge";
+			newDb = GdbConstructImpl3.createInstance(newDbname, new DataDerby(), DBConnector.PROP_RECREATE);
 			InputStream mapping = new FileInputStream(mappingfile);
 			intdb.init(newDb);
 			intdb.run(mapping);
@@ -89,13 +100,17 @@ public class IntdbBuilder {
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
 			while ((inputline = in.readLine()) != null) {
+				mappingrows++;
 				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
 					out.write(inputline + "\n");
 				}
 			}
 			out.close();
 			in.close();
-			System.out.println("Interaction Mapping Downloaded");
+			System.out.println("Interaction Mapping Downloaded from Rhea");
+			System.out.println("Rows of data in downloaded mapping file = "
+					+ mappingrows);
+			
 
 		} catch (Exception e) {
 			System.out.println("Interaction Mapping Download failed!");
@@ -110,18 +125,17 @@ public class IntdbBuilder {
 	 *             when it cannot write to the database
 	 */
 	private void init(GdbConstruct newDb) throws IDMapperException {
-
+		System.out.println("Initialising Interaction Database ...");
 		IntdbBuilder.newDb = newDb;
-
 		newDb.createGdbTables();
 		newDb.preInsert();
-
-		String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
+		System.out.println("Setting Basic Information ...");
 		newDb.setInfo("BUILDDATE", dateStr);
 		newDb.setInfo("DATASOURCENAME", "EBI-RHEA");
 		newDb.setInfo("DATASOURCEVERSION", "1.0.0");
 		newDb.setInfo("SERIES", "standard-interaction");
 		newDb.setInfo("DATATYPE", "Interaction");
+
 	}
 
 	/**
@@ -133,17 +147,21 @@ public class IntdbBuilder {
 	 */
 	private void run(InputStream input) throws MalformedURLException,
 			IOException, IDMapperException {
+		BioDataSource.init();
 		mainref = "";
 		String inputline;
 		String[] array = new String[5];
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		while ((inputline = reader.readLine()) != null) {
+//			 for (int i = 0; i <= 50; i++) {
+			mappingrow++;
+			inputline = reader.readLine();
 			array = inputline.split("\t");
 			identifier = array[3];
 			datasource = array[4];
 			if (!mainref.equalsIgnoreCase(array[0])) {
 				mainref = array[0];
-				System.out.println(mainref + "added");
+				// System.out.println(mainref + "added");
 				intxrefs.clear();
 				idRhea = new Xref(mainref, BioDataSource.RHEA);
 				intxrefs.add(new Xref(mainref, BioDataSource.RHEA));
@@ -176,15 +194,37 @@ public class IntdbBuilder {
 
 				}
 			}
-
 			Xref ref = idRhea;
 			newDb.addGene(ref);
 			newDb.addLink(ref, ref);
 			for (Xref right : intxrefs) {
-				System.out.println("id: "+right.getId()+ "added to the database");
 				newDb.addGene(right);
 				newDb.addLink(ref, right);
 			}
+			printProgBar(mappingrow);
+		}
+	}
+
+	/**
+	 * Prints a progress bar
+	 */
+	private static void printProgBar(int count) {
+		StringBuilder bar = new StringBuilder("[");
+		float percent = (count * 100) / mappingrows;
+		for (int i = 0; i < 50; i++) {
+			if (i < (percent / 2)) {
+				bar.append("=");
+			} else if (i == (percent / 2)) {
+				bar.append(">");
+			} else {
+				bar.append(" ");
+			}
+
+		}
+		if (percent >= 1 && percent <= 100 && percent != newpercent) {
+			float newpercent = percent;
+			bar.append("]   " + newpercent + "%     ");
+			System.out.print("\r" + bar.toString());
 		}
 	}
 
@@ -196,7 +236,7 @@ public class IntdbBuilder {
 	private void done() throws IDMapperException {
 		newDb.commit();
 
-		System.out.println("END processing text file");
+		System.out.println("\nEND processing text file");
 
 		System.out.println("Compacting database");
 
