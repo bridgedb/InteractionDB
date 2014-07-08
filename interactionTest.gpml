@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="Interaction Test Pathway" Version="20140410">
+  <Graphics BoardWidth="549.0" BoardHeight="399.0" />
+  <DataNode TextLabel="Substrate" GraphId="dfc40" Type="Metabolite">
+    <Graphics CenterX="119.0" CenterY="92.0" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <DataNode TextLabel="Product" GraphId="abdae" Type="Metabolite">
+    <Graphics CenterX="279.0" CenterY="92.0" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <Interaction GraphId="id4e0f904a">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="159.0" Y="92.0" GraphRef="dfc40" RelX="1.0" RelY="0.0" />
+      <Point X="239.0" Y="92.0" GraphRef="abdae" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="Rhea" ID="10003" />
+  </Interaction>
+  <InfoBox CenterX="0.0" CenterY="0.0" />
+  <Biopax />
+</Pathway>
+
