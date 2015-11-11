@@ -15,9 +15,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
-import org.bridgedb.bio.BioDataSource;
+import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.rdb.construct.DBConnector;
 import org.bridgedb.rdb.construct.DataDerby;
 import org.bridgedb.rdb.construct.GdbConstruct;
@@ -30,47 +31,57 @@ import org.bridgedb.rdb.construct.GdbConstructImpl3;
  * @author anwesha
  * 
  */
-@SuppressWarnings("deprecation")
+
 public class IntdbBuilder {
 	static String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
 	static float newpercent = 0;
-	private static int mappingrows = 0;
+	private static int mappingrows = 295919;
 	private static int mappingrow = 0;
 	private static File mappingfile = new File("rhea2xrefs.txt");
-	private static String dbname = "rhea_interactions";
-	private static String outputdir = System.getProperty("user.home");
+	private static String DB_NAME = "rhea_interactions";
+	private static String OUTPUT_DIR = System.getProperty("user.home");
 	private Xref idRhea;
+	private Xref idCrossRefs;
 	private static GdbConstruct newDb;
-	private List<Xref> intxrefs = new ArrayList<Xref>();
 	private String identifier;
+	private String direction;
 	private String datasource;
 	private String mainref;
+	private static String dbname = "";
+	private static boolean downloadMapping;
 
 	/**
-	 * command line arguments: 1 - Name of the interactions database to be
-	 * created (eg: interactions) 2 - Output Directory (eg: /home/anwesha/test)
+	 * command line arguments: 0 - Full path of the interactions database to be
+	 * created (eg: /home/user/interactions.bridge) 1 - Boolean download mapping
+	 * (true/false) [Note : the download requires internet connection]
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try{
+		System.out.println("Process started!");
+		try {
 			if (!args[0].isEmpty()) {
 				dbname = args[0];
-			} 
-			if (!args[1].isEmpty()) {
-				outputdir = args[1];
-			} 
-		}catch (Exception e){
+				downloadMapping = Boolean.parseBoolean(args[1]);
+			} else {
+				dbname = OUTPUT_DIR + System.getProperty("file.separator")
+						+ DB_NAME + "_" + dateStr + ".bridge";
+				downloadMapping = false;
+				System.out.println("Using previously downloaded mapping");
+			}
+
+		} catch (Exception e) {
 			System.out.println("Using defaults name and output directory");
 		}
 		IntdbBuilder intdb = new IntdbBuilder();
-
-		intdb.downloadMapping();
+		if (downloadMapping) {
+			intdb.downloadMapping();
+		}
 
 		try {
-			String newDbname = outputdir+System.getProperty("file.separator")+dbname + "_" + dateStr
-					+ ".bridge";
-			newDb = GdbConstructImpl3.createInstance(newDbname, new DataDerby(), DBConnector.PROP_RECREATE);
+			String newDbname = dbname;
+			newDb = GdbConstructImpl3.createInstance(newDbname,
+					new DataDerby(), DBConnector.PROP_RECREATE);
 			InputStream mapping = new FileInputStream(mappingfile);
 			intdb.init(newDb);
 			intdb.run(mapping);
@@ -86,6 +97,7 @@ public class IntdbBuilder {
 	 * Downloads a fresh copy of interaction mappings from Rhea
 	 */
 	private void downloadMapping() {
+		mappingrows = 0;
 		URL url;
 		String inputline = "";
 		try {
@@ -100,8 +112,8 @@ public class IntdbBuilder {
 			BufferedWriter out = new BufferedWriter(new FileWriter(mappingfile,
 					true));
 			while ((inputline = in.readLine()) != null) {
-				mappingrows++;
-				if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
+					if (!inputline.startsWith("RHEA") & inputline.length() > 0) {
+					mappingrows++;
 					out.write(inputline + "\n");
 				}
 			}
@@ -110,7 +122,6 @@ public class IntdbBuilder {
 			System.out.println("Interaction Mapping Downloaded from Rhea");
 			System.out.println("Rows of data in downloaded mapping file = "
 					+ mappingrows);
-			
 
 		} catch (Exception e) {
 			System.out.println("Interaction Mapping Download failed!");
@@ -147,60 +158,63 @@ public class IntdbBuilder {
 	 */
 	private void run(InputStream input) throws MalformedURLException,
 			IOException, IDMapperException {
-		BioDataSource.init();
+		System.out.println("Populating Database ...");
+		DataSourceTxt.init();
 		mainref = "";
 		String inputline;
 		String[] array = new String[5];
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-		while ((inputline = reader.readLine()) != null) {
-//			 for (int i = 0; i <= 50; i++) {
+
+		for (int i = 0; i < mappingrows; i++) {
 			mappingrow++;
 			inputline = reader.readLine();
 			array = inputline.split("\t");
+			direction = array[1];
 			identifier = array[3];
 			datasource = array[4];
+
 			if (!mainref.equalsIgnoreCase(array[0])) {
 				mainref = array[0];
-				// System.out.println(mainref + "added");
-				intxrefs.clear();
-				idRhea = new Xref(mainref, BioDataSource.RHEA);
-				intxrefs.add(new Xref(mainref, BioDataSource.RHEA));
+				idRhea = new Xref(mainref,
+						DataSource.getExistingBySystemCode("Rh"));
+				newDb.addGene(idRhea);
+				newDb.addAttribute(idRhea, "Direction", direction);
+				newDb.addLink(idRhea, idRhea);
 			}
+				if (mainref.equalsIgnoreCase(array[0])) {
+					if (datasource.equalsIgnoreCase("EC")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("E"));
+					} else if (datasource.equals("KEGG_REACTION")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Rk"));
+					} else if (datasource.equals("REACTOME")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Re"));
+					} else if (datasource.equals("METACYC")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Mc"));
+					} else if (datasource.equals("ECOCYC")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Eco"));
 
-			if (mainref.equalsIgnoreCase(array[0])) {
-				if (datasource.equalsIgnoreCase("EC")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.ENZYME_CODE));
-				} else if (datasource.equals("KEGG_REACTION")) {
-					intxrefs.add(new Xref(identifier,
-							BioDataSource.KEGG_REACTION));
+					} else if (datasource.equals("MACIE")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Ma"));
 
-				} else if (datasource.equals("REACTOME")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.REACTOME));
+					} else if (datasource.equals("UNIPATHWAY")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("Up"));
 
-				} else if (datasource.equals("METACYC")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.BIOCYC));
-
-				} else if (datasource.equals("ECOCYC")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.BIOCYC));
-
-				} else if (datasource.equals("MACIE")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.MACIE));
-
-				} else if (datasource.equals("UNIPATHWAY")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.UNIPATHWAY));
-
-				} else if (datasource.equals("UNIPROT")) {
-					intxrefs.add(new Xref(identifier, BioDataSource.UNIPROT));
-
+					} else if (datasource.equals("UNIPROT")) {
+						idCrossRefs = new Xref(identifier,
+								DataSource.getExistingBySystemCode("S"));
+					}
 				}
-			}
-			Xref ref = idRhea;
-			newDb.addGene(ref);
-			newDb.addLink(ref, ref);
-			for (Xref right : intxrefs) {
-				newDb.addGene(right);
-				newDb.addLink(ref, right);
-			}
+
+				newDb.addGene(idCrossRefs);
+				newDb.addLink(idRhea, idCrossRefs);
+			
 			printProgBar(mappingrow);
 		}
 	}
@@ -208,7 +222,7 @@ public class IntdbBuilder {
 	/**
 	 * Prints a progress bar
 	 */
-	private static void printProgBar(int count) {
+	private float printProgBar(int count) {
 		StringBuilder bar = new StringBuilder("[");
 		float percent = (count * 100) / mappingrows;
 		for (int i = 0; i < 50; i++) {
@@ -222,10 +236,11 @@ public class IntdbBuilder {
 
 		}
 		if (percent >= 1 && percent <= 100 && percent != newpercent) {
-			float newpercent = percent;
+			newpercent = percent;
 			bar.append("]   " + newpercent + "%     ");
 			System.out.print("\r" + bar.toString());
 		}
+		return newpercent;
 	}
 
 	/**
@@ -238,7 +253,7 @@ public class IntdbBuilder {
 
 		System.out.println("\nEND processing text file");
 
-		System.out.println("Compacting database");
+		System.out.println("Compacting database : " + dbname);
 
 		System.out.println("Closing connections");
 
