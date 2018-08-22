@@ -4,12 +4,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +27,7 @@ import org.bridgedb.rdb.construct.DBConnector;
 import org.bridgedb.rdb.construct.DataDerby;
 import org.bridgedb.rdb.construct.GdbConstruct;
 import org.bridgedb.rdb.construct.GdbConstructImpl3;
+import org.bridgedb.tools.qc.BridgeQC;
 
 /**
  * This program creates an Interaction annotation BridgeDB derby database
@@ -54,6 +59,7 @@ public class IntdbBuilder {
 	 * command line arguments: 0 - Full path of the interactions database to be
 	 * created (eg: /home/user/interactions.bridge) 1 - Boolean download mapping
 	 * (true/false) [Note : the download requires internet connection]
+	 * 2 - Full path of the previous interactions database to run the QC
 	 * 
 	 * @param args
 	 */
@@ -77,7 +83,6 @@ public class IntdbBuilder {
 		if (downloadMapping) {
 			intdb.downloadMapping();
 		}
-
 		try {
 			String newDbname = dbname;
 			newDb = GdbConstructImpl3.createInstance(newDbname,
@@ -91,6 +96,20 @@ public class IntdbBuilder {
 			e.printStackTrace();
 		}
 
+		try {
+			BridgeQC main = new BridgeQC (new File(args[2]),new File(args[0]));	
+			main.run();
+			String fileName = args[0]+".qc";
+			PrintWriter pw  = new PrintWriter(new FileOutputStream(fileName));	
+			pw.println(main.getOutput());
+			pw.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IDMapperException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -181,40 +200,41 @@ public class IntdbBuilder {
 				newDb.addAttribute(idRhea, "Direction", direction);
 				newDb.addLink(idRhea, idRhea);
 			}
-				if (mainref.equalsIgnoreCase(array[0])) {
-					if (datasource.equalsIgnoreCase("EC")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("E"));
-					} else if (datasource.equals("KEGG_REACTION")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Rk"));
-					} else if (datasource.equals("REACTOME")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Re"));
-					} else if (datasource.equals("METACYC")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Mc"));
-					} else if (datasource.equals("ECOCYC")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Eco"));
+			if (mainref.equalsIgnoreCase(array[0])) {
+				if (datasource.equalsIgnoreCase("EC")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("E"));
+				} else if (datasource.equals("KEGG_REACTION")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Rk"));
+				} else if (datasource.equals("REACTOME")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Re"));
+				} else if (datasource.equals("METACYC")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Mc"));
+				} else if (datasource.equals("ECOCYC")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Eco"));
 
-					} else if (datasource.equals("MACIE")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Ma"));
+				} else if (datasource.equals("MACIE")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Ma"));
 
-					} else if (datasource.equals("UNIPATHWAY")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("Up"));
+				} else if (datasource.equals("UNIPATHWAY")) {
+					idCrossRefs = new Xref(identifier,
+							DataSource.getExistingBySystemCode("Up"));
 
-					} else if (datasource.equals("UNIPROT")) {
-						idCrossRefs = new Xref(identifier,
-								DataSource.getExistingBySystemCode("S"));
-					}
-				}
+				} 
+//					else if (datasource.equals("UNIPROT")) {
+//					idCrossRefs = new Xref(identifier,
+//							DataSource.getExistingBySystemCode("S"));
+//				}
+			}
 
-				newDb.addGene(idCrossRefs);
-				newDb.addLink(idRhea, idCrossRefs);
-			
+			newDb.addGene(idCrossRefs);
+			newDb.addLink(idRhea, idCrossRefs);
+
 			printProgBar(mappingrow);
 		}
 	}
