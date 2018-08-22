@@ -99,12 +99,6 @@ public class IntdbBuilder {
 		try {
 			BridgeQC main = new BridgeQC (new File(args[2]),new File(args[0]));	
 			main.run();
-			String fileName = args[0]+".qc";
-			PrintWriter pw  = new PrintWriter(new FileOutputStream(fileName));	
-			pw.println(main.getOutput());
-			pw.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (IDMapperException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
