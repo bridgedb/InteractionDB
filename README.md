@@ -1,7 +1,7 @@
 Interaction Bridge Database
 ==========================
 
-This is a java application to create a BridgeDB derby database to map identifiers of interactions from 
+This is a java application to create a BridgeDb derby database to map identifiers of interactions from 
 different databases to each other. It has been created using the interaction mapping from Rhea 
 (http://www.ebi.ac.uk/rhea/). The identifier from Rhea is mapped to identifiers from Enzyme Code, 
 EcoCyc, MetaCyc, Macie, Reactome, Kegg Reaction, Unipathway, and Uniprot. This database can be used to 
