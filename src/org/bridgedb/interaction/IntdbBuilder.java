@@ -34,6 +34,7 @@ import org.bridgedb.tools.qc.BridgeQC;
  * mappings from : Rhea
  * 
  * @author anwesha
+ * @author DeniseSl22
  * 
  */
 
@@ -53,7 +54,7 @@ public class IntdbBuilder {
 	private String datasource;
 	private String mainref;
 	private static String dbname = "";
-	private static boolean downloadMapping;
+	private static boolean downloadMapping; 
 
 	/**
 	 * command line arguments: 0 - Full path of the interactions database to be
@@ -79,7 +80,7 @@ public class IntdbBuilder {
 		} catch (Exception e) {
 			System.out.println("Using defaults name and output directory");
 		}
-		IntdbBuilder intdb = new IntdbBuilder();
+		IntdbBuilder intdb = new IntdbBuilder(); //comment from here to 
 		if (downloadMapping) {
 			intdb.downloadMapping();
 		}
@@ -94,7 +95,7 @@ public class IntdbBuilder {
 		} catch (Exception e) {
 			System.out.println("Interaction Database creation failed!");
 			e.printStackTrace();
-		}
+		} // here, if you want to compare two files with each other (without creating a new mapping file.
 
 		try {
 			BridgeQC main = new BridgeQC (new File(args[2]),new File(args[0]));	
