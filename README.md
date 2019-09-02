@@ -21,14 +21,8 @@ java -jar InteractionDB.jar "/absolute/path/InteractionsDatabase.bridge"
 Open this project in Eclipse:
 1. Clone this repository into a local folder on your computer (with "git clone <link>")
 1. Open a (new) workspace
-1. Click on File -> Import... -> Git/Project from Git .
-1. Click Next
-1. Click on "Existing Local Repository"
-1. Click Next
-1. Click Add...
-1. Find the local folder where this github repository is located.
-1. Click Finish in the pop-up menu.
-1. Click Next, and when you can click Finish in the main menu, please do.
+1. Click on File -> Import... -> General/Existing Projects into Workspace...
+1. Click Finish.
 
 From Eclipse, you can build the jar file:
 1. Find the build.xml file
