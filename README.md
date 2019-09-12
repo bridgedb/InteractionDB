@@ -8,15 +8,17 @@ EcoCyc, MetaCyc, Macie, Reactome, Kegg Reaction, Unipathway, and Uniprot. This d
 annotate interactions in PathVisio(http://www.pathvisio.org/), which are displayed in Wikipathways
 (http://wikipathways.org/index.php/WikiPathways) as linkouts to the corresponding databases.
 
-You can build the program by checking out the source code and running the build file using ant.
+You can build the program by checking out the source code and running the build file using Maven:
 
-Or, alternatively you can use the program directly without having to first build it, by downloading the pre-built 
-InteractionDB.jar file from the dist folder and run the jar providing the absolute path of the interaction database 
-to be created as an argument.
+```
+mvn clean package
+```
 
-Running the InteractionDb.jar from your command line: 
+Running the `InteractionDb.jar` from your command line: 
 
-java -jar InteractionDB.jar "/absolute/path/InteractionsDatabase.bridge"
+```
+java -jar target/interaction-db-0.1.0-SNAPSHOT-jar-with-dependencies.jar "/absolute/path/InteractionsDatabase.bridge"
+```
 
 Open this project in Eclipse:
 1. Clone this repository into a local folder on your computer (with "git clone <link>")
