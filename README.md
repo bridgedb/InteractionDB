@@ -22,6 +22,7 @@ Open this project in Eclipse:
 1. Clone this repository into a local folder on your computer (with "git clone <link>")
 1. Open a (new) workspace
 1. Click on File -> Import... -> General/Existing Projects into Workspace...
+1. Select the folder where you've cloned this repository and click on Open.
 1. Click Finish.
 
 From Eclipse, you can build the jar file:
