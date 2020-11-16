@@ -33,6 +33,9 @@ Check the console output if the jar was build properly.
 
 You can also run the IntdbBuilder class from Eclipse:
 1. Open the IntdbBuilder (located under src/org/bridgedb/interaction).
-1. Click on Run -> Run Configurations
-
+1. Click on Run -> Run Configurations.
+1. Set all the required command line arguments:
+- 0 - Full path of the interactions database to be created (eg: /home/user/interactions.bridge) 
+- 1 - Boolean download mapping  (true/false) [Note : the download requires internet connection]
+- 2 - Full path of the previous interactions database to run the QC
 
