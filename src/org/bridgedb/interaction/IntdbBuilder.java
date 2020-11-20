@@ -157,7 +157,7 @@ public class IntdbBuilder {
 		System.out.println("Setting Basic Information ...");
 		newDb.setInfo("BUILDDATE", dateStr);
 		newDb.setInfo("DATASOURCENAME", "EBI-RHEA");
-		newDb.setInfo("DATASOURCEVERSION", "1.0.0");
+		newDb.setInfo("DATASOURCEVERSION", "115");
 		newDb.setInfo("SERIES", "standard-interaction");
 		newDb.setInfo("DATATYPE", "Interaction");
 
