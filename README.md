@@ -24,21 +24,3 @@ Open this project in Eclipse:
 1. Click on File -> Import... -> General/Existing Projects into Workspace...
 1. Select the folder where you've cloned this repository and click on Open.
 1. Click Finish.
-
-From Eclipse, you can build the jar file:
-1. Find the build.xml file
-1. Right mouse click on this file, Run As -> Ant Build.
-Check the console output if the jar was build properly.
-1. The latest version should be located in the "Dist" folder.
-
-You can also run the IntdbBuilder class from Eclipse:
-1. Open the IntdbBuilder (located under src/org/bridgedb/interaction).
-1. Click on Run -> Run Configurations.
-1. Double click on "Java Application" **Note
-1. Set all the required command line arguments:
-- 0 - Full path of the interactions database to be created (eg: /home/user/interactions.bridge) 
-- 1 - Boolean download mapping  (true/false) [Note : the download requires internet connection]
-- 2 - Full path of the previous interactions database to run the QC
-
-**Note: If the Main class is not selected automatically, click the search button and select org.bridgedb.interaction.IntdbBuilder:
-![image](https://user-images.githubusercontent.com/26277832/99790282-2be24c00-2b24-11eb-861d-52c633b51886.png)
